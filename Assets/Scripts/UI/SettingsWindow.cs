@@ -14,7 +14,7 @@ public class SettingsWindow : Window
     private Slider moveTimeSlider;
     
     /// <inheritdoc />
-    public override void OnWillHide()
+    protected override void OnWillHide()
     {
         base.OnWillHide();
 

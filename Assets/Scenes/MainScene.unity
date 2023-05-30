@@ -175,7 +175,6 @@ GameObject:
   - component: {fileID: 298079180}
   - component: {fileID: 298079179}
   - component: {fileID: 298079178}
-  - component: {fileID: 298079177}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -183,23 +182,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &298079177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 298079176}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &298079178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -602,6 +584,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 554476744229929975, guid: e298ad789c66d45f49b9a6b2887bdc37,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e298ad789c66d45f49b9a6b2887bdc37, type: 3}
@@ -1126,6 +1113,11 @@ PrefabInstance:
     - target: {fileID: 1896329220438595719, guid: 3f6328d20534b488c98a75f457b28940,
         type: 3}
       propertyPath: isVisibleOnActivation
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150654904391254638, guid: 3f6328d20534b488c98a75f457b28940,
+        type: 3}
+      propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8232447759199306443, guid: 3f6328d20534b488c98a75f457b28940,

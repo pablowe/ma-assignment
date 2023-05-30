@@ -1,10 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class Window : MonoBehaviour
 {
     public bool isVisibleOnActivation;
-    
+
+    private void Start()
+    {
+        Initialize();
+    }
+
     public void Show()
     {
         OnWillShow();
@@ -18,9 +25,14 @@ public class Window : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public virtual void OnWillShow() { }
+    protected virtual void Initialize()
+    {
+        if (!isVisibleOnActivation) Hide();
+    }
 
-    public virtual void OnShown() { }
+    protected virtual void OnWillShow() { }
 
-    public virtual void OnWillHide() { }
+    protected virtual void OnShown() { }
+
+    protected virtual void OnWillHide() { }
 }

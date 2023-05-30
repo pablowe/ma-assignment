@@ -7,9 +7,11 @@ public class GameSummaryWindow : Window
     [SerializeField]
     private TextMeshProUGUI summaryTextMeshProUGUI;
 
-    private void Start()
+    /// <inheritdoc />
+    protected override void Initialize()
     {
         GameManager.Instance.GameFinished += OnGameFinished;
+        base.Initialize();
     }
 
     public void BackToMainMenuButton()

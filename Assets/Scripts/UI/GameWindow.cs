@@ -28,7 +28,7 @@ public class GameWindow : Window
                    oMark;
     
     /// <inheritdoc />
-    public override void OnWillShow()
+    protected override void OnWillShow()
     {
         base.OnWillShow();
 
@@ -42,7 +42,7 @@ public class GameWindow : Window
     }
 
     /// <inheritdoc />
-    public override void OnWillHide()
+    protected override void OnWillHide()
     {
         base.OnWillHide();
 

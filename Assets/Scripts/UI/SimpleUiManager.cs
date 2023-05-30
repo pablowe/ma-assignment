@@ -37,11 +37,6 @@ public class SimpleUiManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        InitializeWindows();
-    }
-
     public void SetView(View viewToShow)
     {
         if (currentView == viewToShow) return;
@@ -94,14 +89,6 @@ public class SimpleUiManager : MonoBehaviour
                 break;
             default: throw new ArgumentOutOfRangeException(nameof(viewToShow), viewToShow, null);
         }
-    }
-
-    private void InitializeWindows()
-    {
-        if (!mainMenuWindow.isVisibleOnActivation) mainMenuWindow.Hide();
-        if (!gameWindow.isVisibleOnActivation) gameWindow.Hide();
-        if (!gameSummaryWindow.isVisibleOnActivation) gameSummaryWindow.Hide();
-        if (!settingsWindow.isVisibleOnActivation) settingsWindow.Hide();
     }
 
     public Action<AssetBundle> assetBundleLoaded;
