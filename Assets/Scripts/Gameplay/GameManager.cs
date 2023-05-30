@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -26,7 +28,8 @@ public class GameManager : MonoBehaviour
     private bool isGameFinished;
 
     private Coroutine countdownCoroutine;
-    private Coroutine aiDelayedMoveCoroutine;
+
+    private CancellationTokenSource aiMoveDelayTaskCancellationTokenSource = new CancellationTokenSource();
 
     private static GameManager instance;
 
@@ -55,6 +58,11 @@ public class GameManager : MonoBehaviour
     {
         isGameFinished = false;
         
+        board.EmptyBoard();
+        gameHistorySystem.ClearHistory();
+        
+        aiMoveDelayTaskCancellationTokenSource.Cancel();
+        
         player1 = new Player
         {
             playerType = gameSettings.gameMode == GameSettings.GameMode.CvC ? PlayerType.Ai : PlayerType.LocalPlayer, 
@@ -72,12 +80,7 @@ public class GameManager : MonoBehaviour
         currentPlayer = player1.playersMark == Mark.X ? player1 : player2;
         
         PlayerChanged?.Invoke(currentPlayer);
-        
-        board.EmptyBoard();
-        gameHistorySystem.ClearHistory();
 
-        if (aiDelayedMoveCoroutine != null) StopCoroutine(aiDelayedMoveCoroutine);
-        
         GameInitialized?.Invoke(gameSettings);
 
         StartNextRound();
@@ -142,7 +145,7 @@ public class GameManager : MonoBehaviour
     {
         isGameFinished = true;
 
-        if (aiDelayedMoveCoroutine != null) StopCoroutine(aiDelayedMoveCoroutine);
+        aiMoveDelayTaskCancellationTokenSource.Cancel();
         if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
         
         GameFinished?.Invoke(winner);
@@ -152,8 +155,8 @@ public class GameManager : MonoBehaviour
     {
         RestartCountdown();
         
-        if (aiDelayedMoveCoroutine != null) StopCoroutine(aiDelayedMoveCoroutine);
-        if (currentPlayer.playerType == PlayerType.Ai) MakeAiMove();
+        aiMoveDelayTaskCancellationTokenSource.Cancel();
+        if (currentPlayer.playerType == PlayerType.Ai) MakeAiMoveWithDelay();
     }
 
     private void SwitchCurrentPlayer()
@@ -168,15 +171,10 @@ public class GameManager : MonoBehaviour
         return currentPlayer == player1 ? player2 : player1;
     }
 
-    private void MakeAiMove()
+    private async void MakeAiMoveWithDelay()
     {
-        aiDelayedMoveCoroutine = StartCoroutine(DelayActionCoroutine(
-                                                 0.5f, 
-                                                 () =>
-                                                 {
-                                                     OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
-                                                 }
-                                             ));
+        await Task.Delay(500, new CancellationToken());
+        OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
     }
 
     private void RestartCountdown()
@@ -184,13 +182,6 @@ public class GameManager : MonoBehaviour
         if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
 
         countdownCoroutine = StartCoroutine(StartNewCountdown());
-    }
-
-    private IEnumerator DelayActionCoroutine(float delay, Action action)
-    {
-        yield return new WaitForSecondsRealtime(delay);
-        
-        action?.Invoke();
     }
 
     private IEnumerator StartNewCountdown()
