@@ -11,53 +11,73 @@ namespace Tests
         [Test]
         public void MaxValidMoves()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,O,X},
                 {O,X,O},
                 {O,X,O}
             };
 
-            Assert.IsTrue(GameManager.IsDraw(board));
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
+
+            Assert.IsTrue(resultChecker.IsDraw());
         }
         
         [Test]
         public void ValidMovesLeft()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,_,_},
                 {O,X,O},
                 {O,X,O}
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
 
-            Assert.IsTrue(!GameManager.IsDraw(board));
+            Assert.IsTrue(!resultChecker.IsDraw());
         }
         
         [Test]
         public void PlayerXWon()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,X,X},
                 {O,O,X},
                 {O,X,O}
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
 
-            Assert.IsTrue(!GameManager.IsDraw(board));
+            Assert.IsTrue(!resultChecker.IsDraw());
         }
         
         [Test]
         public void PlayerOWon()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {_,X,O},
                 {O,O,X},
                 {O,X,X}
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
 
-            Assert.IsTrue(!GameManager.IsDraw(board));
+            Assert.IsTrue(!resultChecker.IsDraw());
         }
     }
 }

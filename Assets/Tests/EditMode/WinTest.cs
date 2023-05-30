@@ -8,58 +8,76 @@ namespace Tests
 {
     public class WinTest : BoardTest
     {
-        private Player player = new Player {playersMark = Mark.X, playerType = PlayerType.LocalPlayer};
-        
         [Test]
         public void HorizontalCase()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,X,X},
                 {O,_,O},
                 {_,_,_}
             };
 
-            Assert.IsTrue(GameManager.DidPlayerWin(board, player));
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
+            
+            Assert.IsTrue(resultChecker.TryGetWinningPlayersMark() == Mark.X);
         }
         
         [Test]
         public void VerticalCase()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,O,_},
                 {X,_,O},
                 {X,O,X}
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
 
-            Assert.IsTrue(GameManager.DidPlayerWin(board, player));
+            Assert.IsTrue(resultChecker.TryGetWinningPlayersMark() == Mark.X);
         }
         
         [Test]
         public void DiagonalCase()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,O,_},
                 {O,X,O},
                 {X,O,X}
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
 
-            Assert.IsTrue(GameManager.DidPlayerWin(board, player));
+            Assert.IsTrue(resultChecker.TryGetWinningPlayersMark() == Mark.X);
         }
         
         [Test]
         public void NoWinCase()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,O,X},
                 {_,_,O},
                 {X,O,X}
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+            
+            var resultChecker = new ResultChecker(board);
 
-            Assert.IsTrue(!GameManager.DidPlayerWin(board, player));
+            Assert.IsTrue(resultChecker.TryGetWinningPlayersMark() == null);
         }
     }
 }

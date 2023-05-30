@@ -19,14 +19,7 @@ public class ResultChecker
         return TryGetWinningPlayersMark() == null && board.GetMovesNumber() >= board.GetSize();
     }
 
-    public bool DidPlayerWin(Player player)
-    {
-        if ((player == null) || (board == null)) throw new ArgumentException("Player or Game Board cannot be null");
-        
-        return TryGetWinningPlayersMark() == player.playersMark;
-    }
-    
-    private Mark? TryGetWinningPlayersMark()
+    public Mark? TryGetWinningPlayersMark()
     {
         var emptyCellValue = board.GetEmptyCellValue;
         for (int i = 0; i < 3; i++)
