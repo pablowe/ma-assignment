@@ -12,7 +12,9 @@ public class GameManager : MonoBehaviour
 
     public static GameSettings gameSettings;
 
-    private static int[,] board;
+    private Board board;
+    private ResultChecker resultChecker;
+    private MoveValidator moveValidator;
 
     private Player player1,
                    player2;
@@ -44,7 +46,10 @@ public class GameManager : MonoBehaviour
             instance = this;
         }
 
-        InitializeBoard();
+        board = new Board();
+        resultChecker = new ResultChecker(board);
+        moveValidator = new MoveValidator(board);
+        
         gameSettings = GetInitialGameSettings();
     }
 
@@ -70,7 +75,7 @@ public class GameManager : MonoBehaviour
         
         PlayerChanged?.Invoke(currentPlayer);
         
-        InitializeBoard();
+        board.EmptyBoard();
 
         movesHistory = new Vector2Int[MaxValidMoves];
 
@@ -89,23 +94,23 @@ public class GameManager : MonoBehaviour
 
         var castedCellCoordinates = (Vector2Int)cellCoordinates;
         
-        if (!GetMoveValidity(castedCellCoordinates))
+        if (!moveValidator.IsMoveValid(castedCellCoordinates))
         {
             return;
         }
 
-        movesHistory[GetValidMovesNumber(board)] = castedCellCoordinates;
+        movesHistory[board.GetMovesNumber()] = castedCellCoordinates;
 
         SetMarkOnBoard(castedCellCoordinates);
         PlayerValidMove?.Invoke(castedCellCoordinates, currentPlayer.playersMark);
 
-        if (DidPlayerWin(board, currentPlayer))
+        if (resultChecker.TryGetWinningPlayersMark() == currentPlayer.playersMark)
         {
             FinishGame(currentPlayer);
             return;
         }
         
-        if (IsDraw(board))
+        if (resultChecker.IsDraw())
         {
             FinishGame(null);
             return;
@@ -124,14 +129,14 @@ public class GameManager : MonoBehaviour
 
     public void FindHintCoordinatesInCurrentBoard()
     {
-        FindHintCoordinates(out var suggestedCoordinates, board);
+        FindHintCoordinates(out var suggestedCoordinates, board.GetCurrentData());
         
         SuggestedValidMoveFound?.Invoke(suggestedCoordinates);
     }
 
     public void TryUndoLastMove()
     {
-        var validMovesNumber = GetValidMovesNumber(board);
+        var validMovesNumber = board.GetMovesNumber();
         
         if (validMovesNumber <= 0) return;
         
@@ -141,7 +146,7 @@ public class GameManager : MonoBehaviour
 
         var lastMoveCoordinates = movesHistory[validMovesNumber - 1];
         
-        UndoMove(lastMoveCoordinates, board);
+        UndoMove(lastMoveCoordinates, board.GetCurrentData());
         
         MoveRevered?.Invoke(lastMoveCoordinates);
         
@@ -151,45 +156,6 @@ public class GameManager : MonoBehaviour
     public static void UndoMove(Vector2Int lastMoveCoordinates, int[,] gameBoard)
     {
         ClearBoardCell(lastMoveCoordinates, gameBoard);
-    }
-
-    public static bool IsDraw(int[,] gameBoard)
-    {
-        if (gameBoard == null) throw new ArgumentException("Game Board cannot be null");
-
-        return (TryGetWinningPlayersMark(gameBoard) == null) && (GetValidMovesNumber(gameBoard) >= MaxValidMoves);
-    }
-
-    public static bool DidPlayerWin(int[,] gameBoard, Player player)
-    {
-        if ((player == null) || (gameBoard == null)) throw new ArgumentException("Player or Game Board cannot be null");
-        
-        return TryGetWinningPlayersMark(gameBoard) == player.playersMark;
-    }
-    
-    public static Mark? TryGetWinningPlayersMark(int[,] gameBoard)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            if ((gameBoard[i, 0] != EmptyCellValue) && (gameBoard[i, 0] == gameBoard[i, 1]) && (gameBoard[i, 0] == gameBoard[i, 2])) return (Mark)gameBoard[i, 0];
-            if ((gameBoard[0, i] != EmptyCellValue) && (gameBoard[0, i] == gameBoard[1, i]) && (gameBoard[0, i] == gameBoard[2, i])) return (Mark)gameBoard[0, i];
-        }
-        
-        if ((gameBoard[0, 0] != EmptyCellValue) && (gameBoard[0, 0] == gameBoard[1, 1]) && (gameBoard[0, 0] == gameBoard[2, 2])) return (Mark)gameBoard[0, 0];
-        if ((gameBoard[0, 2] != EmptyCellValue) && (gameBoard[0, 2] == gameBoard[1, 1]) && (gameBoard[0, 2] == gameBoard[2, 0])) return (Mark)gameBoard[0, 2];
-
-        return null;
-    }
-    
-    private void InitializeBoard()
-    {
-        if (board == null) board = new int[3, 3];
-
-        for (var i = 0; i < 3; i++)
-        {
-            for (var j = 0; j < 3; j++) 
-                board[i, j] = EmptyCellValue;
-        }
     }
 
     private static int GetValidMovesNumber(int[,] gameBoard)
@@ -243,7 +209,7 @@ public class GameManager : MonoBehaviour
                                                  0.5f, 
                                                  () =>
                                                  {
-                                                     OnBoardCellClicked(GetRandomEmptyCellCoordinates(board), true);
+                                                     OnBoardCellClicked(GetRandomEmptyCellCoordinates(board.GetCurrentData()), true);
                                                  }
                                              ));
     }
@@ -270,12 +236,7 @@ public class GameManager : MonoBehaviour
 
     private void SetMarkOnBoard(Vector2Int cellCoordinates)
     {
-        board[cellCoordinates.x, cellCoordinates.y] = (int)currentPlayer.playersMark;
-    }
-
-    private bool GetMoveValidity(Vector2Int cellCoordinates)
-    {
-        return board[cellCoordinates.x, cellCoordinates.y] == -1;
+        board.SetCellAtPosition(cellCoordinates.x, cellCoordinates.y, (int)currentPlayer.playersMark);
     }
 
     private void RestartCountdown()

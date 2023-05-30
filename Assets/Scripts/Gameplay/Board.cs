@@ -10,7 +10,12 @@ public class Board
 
 	public Board()
 	{
-		InitializeBoard();
+		EmptyBoard();
+	}
+
+	public int[,] GetCurrentData()
+	{
+		return boardData;
 	}
 
 	public void SetBoardData(int[,] data)
@@ -18,9 +23,14 @@ public class Board
 		boardData = data;
 	}
 
-	public int GetCellValue(int x, int y)
+	public int GetCellAtPosition(int x, int y)
 	{
 		return boardData[x, y];
+	}
+
+	public void SetCellAtPosition(int x, int y, int valueToSet)
+	{
+		boardData[x, y] = valueToSet;
 	}
 
 	public int GetMovesNumber()
@@ -46,7 +56,7 @@ public class Board
 
 	public int GetEmptyCellValue => EmptyCellValue;
 
-	private void InitializeBoard()
+	public void EmptyBoard()
 	{
 		boardData = new int[3, 3];
 		
