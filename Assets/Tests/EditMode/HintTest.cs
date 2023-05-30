@@ -9,46 +9,57 @@ namespace Tests
         [Test]
         public void NoValidMoves()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,O,X},
                 {O,X,O},
                 {O,X,O}
             };
-
-            GameManager.FindHintCoordinates(out var coordinates, board);
             
-            Assert.AreEqual(null, coordinates);
+            var board = new Board();
+            board.SetBoardData(data);
+
+            var hintSystem = new HintSystem(board);
+
+            Assert.AreEqual(null, hintSystem.GetHintCoordinates());
         }
         
         [Test]
         public void OnlyOneValidMove()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,O,X},
                 {O,_,O},
                 {O,X,O}
             };
 
-            GameManager.FindHintCoordinates(out var coordinates, board);
+            var board = new Board();
+            board.SetBoardData(data);
+
+            var hintSystem = new HintSystem(board);
             
-            Assert.AreEqual(new Vector2Int{x = 1, y = 1}, coordinates);
+            Assert.AreEqual(new Vector2Int{x = 1, y = 1}, hintSystem.GetHintCoordinates());
         }
         
         [Test]
         public void MultipleValidMoves()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {_,O,_},
                 {O,_,O},
                 {X,X,_}
             };
 
-            GameManager.FindHintCoordinates(out var coordinates, board);
+            var board = new Board();
+            board.SetBoardData(data);
 
-            Assert.True((coordinates != null) && board[coordinates.Value.x, coordinates.Value.y] == _);
+            var hintSystem = new HintSystem(board);
+
+            var hintCoordinates = hintSystem.GetHintCoordinates();
+
+            Assert.True((hintCoordinates != null) && board.GetCellAtPosition(hintCoordinates.Value.x, hintCoordinates.Value.y) == _);
         }
     }
 }

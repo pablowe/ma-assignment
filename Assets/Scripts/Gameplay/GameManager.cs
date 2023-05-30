@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     private Board board;
     private ResultChecker resultChecker;
     private MoveValidator moveValidator;
+    private HintSystem hintSystem;
 
     private Player player1,
                    player2;
@@ -49,6 +50,7 @@ public class GameManager : MonoBehaviour
         board = new Board();
         resultChecker = new ResultChecker(board);
         moveValidator = new MoveValidator(board);
+        hintSystem = new HintSystem(board);
         
         gameSettings = GetInitialGameSettings();
     }
@@ -120,16 +122,9 @@ public class GameManager : MonoBehaviour
         StartNextRound();
     }
 
-    public static void FindHintCoordinates(out Vector2Int? suggestedCoordinates, int[,] gameBoard)
-    {
-        suggestedCoordinates = null;
-        
-        if (GetValidMovesNumber(gameBoard) < MaxValidMoves) suggestedCoordinates = GetRandomEmptyCellCoordinates(gameBoard);
-    }
-
     public void FindHintCoordinatesInCurrentBoard()
     {
-        FindHintCoordinates(out var suggestedCoordinates, board.GetCurrentData());
+        var suggestedCoordinates = hintSystem.GetHintCoordinates();
         
         SuggestedValidMoveFound?.Invoke(suggestedCoordinates);
     }
@@ -157,21 +152,7 @@ public class GameManager : MonoBehaviour
     {
         ClearBoardCell(lastMoveCoordinates, gameBoard);
     }
-
-    private static int GetValidMovesNumber(int[,] gameBoard)
-    {
-        var validMovesNumber = 0;
-        
-        for (var i = 0; i < 3; i++)
-        {
-            for (var j = 0; j < 3; j++)
-                if (gameBoard[i, j] != EmptyCellValue)
-                    validMovesNumber++;
-        }
-
-        return validMovesNumber;
-    }
-
+    
     private void FinishGame(Player winner)
     {
         isGameFinished = true;
@@ -209,7 +190,7 @@ public class GameManager : MonoBehaviour
                                                  0.5f, 
                                                  () =>
                                                  {
-                                                     OnBoardCellClicked(GetRandomEmptyCellCoordinates(board.GetCurrentData()), true);
+                                                     OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
                                                  }
                                              ));
     }
@@ -217,21 +198,6 @@ public class GameManager : MonoBehaviour
     private static void ClearBoardCell(Vector2Int cellCoordinates, int[,] gameBoard)
     {
         gameBoard[cellCoordinates.x, cellCoordinates.y] = EmptyCellValue;
-    }
-
-    private static Vector2Int? GetRandomEmptyCellCoordinates(int[,] gameBoard)
-    {
-        var emptyCells = new List<Vector2Int>();
-        
-        for (var i = 0; i < 3; i++)
-        {
-            for (var j = 0; j < 3; j++) 
-                if (gameBoard[i,j] == EmptyCellValue) emptyCells.Add(new Vector2Int(i,j));
-        }
-
-        if (emptyCells.Count == 0) return null;
-
-        return emptyCells[Random.Range(0, emptyCells.Count)];
     }
 
     private void SetMarkOnBoard(Vector2Int cellCoordinates)
