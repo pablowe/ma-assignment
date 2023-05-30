@@ -31,7 +31,7 @@ public class BoardCell : MonoBehaviour
 
 	    gameManager.PlayerValidMove += OnPlayersValidMove;
 	    gameManager.SuggestedValidMoveFound += OnSuggestedValidMoveFound;
-	    gameManager.MoveRevered += OnMoveReverted;
+	    gameManager.MoveReverted += OnMoveReverted;
     }
 
     public void Deinitialize()
@@ -40,7 +40,7 @@ public class BoardCell : MonoBehaviour
 	    
 	    gameManager.PlayerValidMove -= OnPlayersValidMove;
 	    gameManager.SuggestedValidMoveFound -= OnSuggestedValidMoveFound;
-	    gameManager.MoveRevered -= OnMoveReverted;
+	    gameManager.MoveReverted -= OnMoveReverted;
     }
 
     public void ResetCell()

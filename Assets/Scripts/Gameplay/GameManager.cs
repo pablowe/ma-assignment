@@ -99,7 +99,7 @@ public class GameManager : MonoBehaviour
         SwitchCurrentPlayer();
         isGameFinished = false;
 
-        MoveRevered?.Invoke((Vector2Int)revertedMovesCoord);
+        MoveReverted?.Invoke((Vector2Int)revertedMovesCoord);
         
         aiMoveDelayTaskCancellationTokenSource.Cancel();
         StartNextRound();
@@ -220,7 +220,7 @@ public class GameManager : MonoBehaviour
     
     public Action<Vector2Int?> SuggestedValidMoveFound;
     
-    public Action<Vector2Int> MoveRevered;
+    public Action<Vector2Int> MoveReverted;
 
     public Action<Vector2Int, Mark> PlayerValidMove;
 
