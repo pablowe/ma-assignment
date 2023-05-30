@@ -16,25 +16,19 @@ public class GameManager : MonoBehaviour
     private ResultChecker resultChecker;
     private MoveValidator moveValidator;
     private HintSystem hintSystem;
+    private GameHistorySystem gameHistorySystem;
+    private BoardMoveSystem boardMoveSystem;
 
     private Player player1,
                    player2;
 
     private Player currentPlayer;
-
     private bool isGameFinished;
 
     private Coroutine countdownCoroutine;
-
     private Coroutine aiDelayedMoveCoroutine;
 
-    private Vector2Int[] movesHistory;
-
     private static GameManager instance;
-
-    private const int EmptyCellValue = -1;
-
-    private const int MaxValidMoves = 9;
 
     private void Awake()
     {
@@ -51,6 +45,8 @@ public class GameManager : MonoBehaviour
         resultChecker = new ResultChecker(board);
         moveValidator = new MoveValidator(board);
         hintSystem = new HintSystem(board);
+        gameHistorySystem = new GameHistorySystem(board);
+        boardMoveSystem = new BoardMoveSystem(board, moveValidator, gameHistorySystem);
         
         gameSettings = GetInitialGameSettings();
     }
@@ -78,8 +74,7 @@ public class GameManager : MonoBehaviour
         PlayerChanged?.Invoke(currentPlayer);
         
         board.EmptyBoard();
-
-        movesHistory = new Vector2Int[MaxValidMoves];
+        gameHistorySystem.ClearHistory();
 
         if (aiDelayedMoveCoroutine != null) StopCoroutine(aiDelayedMoveCoroutine);
         
@@ -90,22 +85,43 @@ public class GameManager : MonoBehaviour
 
     public void OnBoardCellClicked(Vector2Int? cellCoordinates, bool isAiTurn = false)
     {
-        if (isGameFinished || 
-            ((currentPlayer.playerType == PlayerType.Ai) && !isAiTurn) ||
-            (cellCoordinates == null)) return;
+        if (isGameFinished) return;
+        if (currentPlayer.playerType == PlayerType.Ai && !isAiTurn) return;
+        if (cellCoordinates == null) return;
 
         var castedCellCoordinates = (Vector2Int)cellCoordinates;
+        var didMove = boardMoveSystem.TryProceedMove(castedCellCoordinates, currentPlayer);
         
-        if (!moveValidator.IsMoveValid(castedCellCoordinates))
-        {
-            return;
-        }
-
-        movesHistory[board.GetMovesNumber()] = castedCellCoordinates;
-
-        SetMarkOnBoard(castedCellCoordinates);
+        if (!didMove) return;
+        
         PlayerValidMove?.Invoke(castedCellCoordinates, currentPlayer.playersMark);
 
+        CheckResultsAndUpdateGameState();
+    }
+
+    public void FindHintCoordinatesInCurrentBoard()
+    {
+        var suggestedCoordinates = hintSystem.GetHintCoordinates();
+        
+        SuggestedValidMoveFound?.Invoke(suggestedCoordinates);
+    }
+
+    public void TryUndoLastMove()
+    {
+        var revertedMovesCoord = gameHistorySystem.GetCoordsAndUndoLastMove();
+
+        if (revertedMovesCoord == null) return;
+        
+        SwitchCurrentPlayer();
+        isGameFinished = false;
+
+        MoveRevered?.Invoke((Vector2Int)revertedMovesCoord);
+        
+        StartNextRound();
+    }
+
+    private void CheckResultsAndUpdateGameState()
+    {
         if (resultChecker.TryGetWinningPlayersMark() == currentPlayer.playersMark)
         {
             FinishGame(currentPlayer);
@@ -122,37 +138,6 @@ public class GameManager : MonoBehaviour
         StartNextRound();
     }
 
-    public void FindHintCoordinatesInCurrentBoard()
-    {
-        var suggestedCoordinates = hintSystem.GetHintCoordinates();
-        
-        SuggestedValidMoveFound?.Invoke(suggestedCoordinates);
-    }
-
-    public void TryUndoLastMove()
-    {
-        var validMovesNumber = board.GetMovesNumber();
-        
-        if (validMovesNumber <= 0) return;
-        
-        if (validMovesNumber < MaxValidMoves) SwitchCurrentPlayer();
-
-        isGameFinished = false;
-
-        var lastMoveCoordinates = movesHistory[validMovesNumber - 1];
-        
-        UndoMove(lastMoveCoordinates, board.GetCurrentData());
-        
-        MoveRevered?.Invoke(lastMoveCoordinates);
-        
-        StartNextRound();
-    }
-
-    public static void UndoMove(Vector2Int lastMoveCoordinates, int[,] gameBoard)
-    {
-        ClearBoardCell(lastMoveCoordinates, gameBoard);
-    }
-    
     private void FinishGame(Player winner)
     {
         isGameFinished = true;
@@ -161,6 +146,14 @@ public class GameManager : MonoBehaviour
         if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
         
         GameFinished?.Invoke(winner);
+    }
+    
+    private void StartNextRound()
+    {
+        RestartCountdown();
+        
+        if (aiDelayedMoveCoroutine != null) StopCoroutine(aiDelayedMoveCoroutine);
+        if (currentPlayer.playerType == PlayerType.Ai) MakeAiMove();
     }
 
     private void SwitchCurrentPlayer()
@@ -175,15 +168,6 @@ public class GameManager : MonoBehaviour
         return currentPlayer == player1 ? player2 : player1;
     }
 
-    private void StartNextRound()
-    {
-        RestartCountdown();
-        
-        if (aiDelayedMoveCoroutine != null) StopCoroutine(aiDelayedMoveCoroutine);
-        
-        if (currentPlayer.playerType == PlayerType.Ai) MakeAiMove();
-    }
-
     private void MakeAiMove()
     {
         aiDelayedMoveCoroutine = StartCoroutine(DelayActionCoroutine(
@@ -193,16 +177,6 @@ public class GameManager : MonoBehaviour
                                                      OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
                                                  }
                                              ));
-    }
-
-    private static void ClearBoardCell(Vector2Int cellCoordinates, int[,] gameBoard)
-    {
-        gameBoard[cellCoordinates.x, cellCoordinates.y] = EmptyCellValue;
-    }
-
-    private void SetMarkOnBoard(Vector2Int cellCoordinates)
-    {
-        board.SetCellAtPosition(cellCoordinates.x, cellCoordinates.y, (int)currentPlayer.playersMark);
     }
 
     private void RestartCountdown()
