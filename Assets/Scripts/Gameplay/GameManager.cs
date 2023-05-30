@@ -55,20 +55,8 @@ public class GameManager : MonoBehaviour
         gameHistorySystem.ClearHistory();
         
         aiMoveDelayTaskCancellationTokenSource.Cancel();
-        
-        player1 = new Player
-        {
-            playerType = gameSettings.gameMode == GameSettings.GameMode.CvC ? PlayerType.Ai : PlayerType.LocalPlayer, 
-            playersMark = Random.Range(0,1f) > 0.5f ? Mark.X : Mark.O
-        };
-        player1.playerName = $"{Utility.GetDefaultPlayerName(player1.playerType)} (Player 1)";
 
-        player2 = new Player
-        {
-            playerType = gameSettings.gameMode == GameSettings.GameMode.PvP ? PlayerType.LocalPlayer : PlayerType.Ai,
-            playersMark = player1.playersMark == Mark.O ? Mark.X : Mark.O
-        };
-        player2.playerName = $"{Utility.GetDefaultPlayerName(player2.playerType)} (Player 2)";
+        CreatePlayers();
 
         currentPlayer = player1.playersMark == Mark.X ? player1 : player2;
         
@@ -115,6 +103,23 @@ public class GameManager : MonoBehaviour
         
         aiMoveDelayTaskCancellationTokenSource.Cancel();
         StartNextRound();
+    }
+
+    private void CreatePlayers()
+    {
+        player1 = new Player
+        {
+            playerType = gameSettings.gameMode == GameSettings.GameMode.CvC ? PlayerType.Ai : PlayerType.LocalPlayer, 
+            playersMark = Random.Range(0,1f) > 0.5f ? Mark.X : Mark.O
+        };
+        player1.playerName = $"{Utility.GetDefaultPlayerName(player1.playerType)} (Player 1)";
+
+        player2 = new Player
+        {
+            playerType = gameSettings.gameMode == GameSettings.GameMode.PvP ? PlayerType.LocalPlayer : PlayerType.Ai,
+            playersMark = player1.playersMark == Mark.O ? Mark.X : Mark.O
+        };
+        player2.playerName = $"{Utility.GetDefaultPlayerName(player2.playerType)} (Player 2)";
     }
 
     private void CheckResultsAndUpdateGameState()
