@@ -91,7 +91,6 @@ public class GameManager : MonoBehaviour
         
         if (!GetMoveValidity(castedCellCoordinates))
         {
-            PlayerInvalidMove?.Invoke();
             return;
         }
 
@@ -327,8 +326,6 @@ public class GameManager : MonoBehaviour
     public Action<Vector2Int> MoveRevered;
 
     public Action<Vector2Int, Mark> PlayerValidMove;
-
-    public Action PlayerInvalidMove;
 
     public Action<Player> GameFinished;
 
