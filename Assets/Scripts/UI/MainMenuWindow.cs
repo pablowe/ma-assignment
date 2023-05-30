@@ -22,23 +22,23 @@ public class MainMenuWindow : Window
     {
         var gameMode = Utility.GetGameModeFromIndex(mode);
         
-        GameManager.gameSettings.gameMode = gameMode;
+        ServiceLocator.ResolveAndGet<GameManager>().gameSettings.gameMode = gameMode;
         selectedModeText.text = Utility.GetGameModeName(gameMode);
         modesSection.SetActive(false);
     }
 
     public void StartGameButton()
     {
-        SimpleUiManager.Instance.SetView(SimpleUiManager.View.Game);
+        ServiceLocator.ResolveAndGet<SimpleUiManager>().SetView(SimpleUiManager.View.Game);
     }
 
     public void ReSkinButton()
     {
-        SimpleUiManager.Instance.TryLoadAssetBundle(assetBundleNameInputField.text);
+        ServiceLocator.ResolveAndGet<SimpleUiManager>().TryLoadAssetBundle(assetBundleNameInputField.text);
     }
 
     public void SettingsWindow()
     {
-        SimpleUiManager.Instance.settingsWindow.Show();
+        ServiceLocator.ResolveAndGet<SimpleUiManager>().settingsWindow.Show();
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,9 +9,7 @@ using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get { return instance; } }
-
-    public static GameSettings gameSettings;
+    public GameSettings gameSettings;
 
     private Board board;
     private ResultChecker resultChecker;
@@ -31,18 +28,9 @@ public class GameManager : MonoBehaviour
 
     private CancellationTokenSource aiMoveDelayTaskCancellationTokenSource = new CancellationTokenSource();
 
-    private static GameManager instance;
-
     private void Awake()
     {
-        if ((instance != null) && (instance != this))
-        {
-            Destroy(gameObject);
-        } 
-        else 
-        {
-            instance = this;
-        }
+        ServiceLocator.Register(this);
 
         board = new Board();
         resultChecker = new ResultChecker(board);
@@ -52,6 +40,11 @@ public class GameManager : MonoBehaviour
         boardMoveSystem = new BoardMoveSystem(board, moveValidator, gameHistorySystem);
         
         gameSettings = GetInitialGameSettings();
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
     }
 
     public void InitializeGame()
@@ -120,6 +113,7 @@ public class GameManager : MonoBehaviour
 
         MoveRevered?.Invoke((Vector2Int)revertedMovesCoord);
         
+        aiMoveDelayTaskCancellationTokenSource.Cancel();
         StartNextRound();
     }
 
@@ -154,8 +148,8 @@ public class GameManager : MonoBehaviour
     private void StartNextRound()
     {
         RestartCountdown();
-        
         aiMoveDelayTaskCancellationTokenSource.Cancel();
+        
         if (currentPlayer.playerType == PlayerType.Ai) MakeAiMoveWithDelay();
     }
 
@@ -173,8 +167,14 @@ public class GameManager : MonoBehaviour
 
     private async void MakeAiMoveWithDelay()
     {
-        await Task.Delay(500, new CancellationToken());
-        OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
+        aiMoveDelayTaskCancellationTokenSource = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(500, aiMoveDelayTaskCancellationTokenSource.Token);
+            OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
+        }
+        catch (TaskCanceledException) { }
     }
 
     private void RestartCountdown()

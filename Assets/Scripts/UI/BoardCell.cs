@@ -27,16 +27,20 @@ public class BoardCell : MonoBehaviour
 	    
 	    ResetCell();
 
-	    GameManager.Instance.PlayerValidMove += OnPlayersValidMove;
-	    GameManager.Instance.SuggestedValidMoveFound += OnSuggestedValidMoveFound;
-	    GameManager.Instance.MoveRevered += OnMoveReverted;
+	    var gameManager = ServiceLocator.ResolveAndGet<GameManager>();
+
+	    gameManager.PlayerValidMove += OnPlayersValidMove;
+	    gameManager.SuggestedValidMoveFound += OnSuggestedValidMoveFound;
+	    gameManager.MoveRevered += OnMoveReverted;
     }
 
     public void Deinitialize()
     {
-	    GameManager.Instance.PlayerValidMove -= OnPlayersValidMove;
-	    GameManager.Instance.SuggestedValidMoveFound -= OnSuggestedValidMoveFound;
-	    GameManager.Instance.MoveRevered -= OnMoveReverted;
+	    var gameManager = ServiceLocator.ResolveAndGet<GameManager>();
+	    
+	    gameManager.PlayerValidMove -= OnPlayersValidMove;
+	    gameManager.SuggestedValidMoveFound -= OnSuggestedValidMoveFound;
+	    gameManager.MoveRevered -= OnMoveReverted;
     }
 
     public void ResetCell()
@@ -47,7 +51,7 @@ public class BoardCell : MonoBehaviour
 
     public void BoardCellButton()
     {
-	    GameManager.Instance.OnBoardCellClicked(cellCoordinates);
+	    ServiceLocator.ResolveAndGet<GameManager>().OnBoardCellClicked(cellCoordinates);
     }
     
     private void SetCellMark(Mark playersMark)

@@ -18,7 +18,7 @@ public class SettingsWindow : Window
     {
         base.OnWillHide();
 
-        GameManager.gameSettings.moveTime = (int)moveTimeSlider.value;
+        ServiceLocator.ResolveAndGet<GameManager>().gameSettings.moveTime = (int)moveTimeSlider.value;
     }
 
     public void OnSliderValueChanged(float value)

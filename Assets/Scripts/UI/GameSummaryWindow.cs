@@ -10,13 +10,13 @@ public class GameSummaryWindow : Window
     /// <inheritdoc />
     protected override void Initialize()
     {
-        GameManager.Instance.GameFinished += OnGameFinished;
+        ServiceLocator.ResolveAndGet<GameManager>().GameFinished += OnGameFinished;
         base.Initialize();
     }
 
     public void BackToMainMenuButton()
     {
-        SimpleUiManager.Instance.SetView(SimpleUiManager.View.MainMenu);
+        ServiceLocator.ResolveAndGet<SimpleUiManager>().SetView(SimpleUiManager.View.MainMenu);
         Hide();
     }
 
@@ -29,6 +29,6 @@ public class GameSummaryWindow : Window
 
     private void OnDestroy()
     {
-        GameManager.Instance.GameFinished -= OnGameFinished;
+        ServiceLocator.ResolveAndGet<GameManager>().GameFinished -= OnGameFinished;
     }
 }

@@ -13,9 +13,6 @@ public class SimpleUiManager : MonoBehaviour
     public GameSummaryWindow gameSummaryWindow;
 
     public SettingsWindow settingsWindow;
-    public static SimpleUiManager Instance { get { return instance; } }
-    
-    private static SimpleUiManager instance;
 
     private View currentView = View.MainMenu;
 
@@ -27,14 +24,12 @@ public class SimpleUiManager : MonoBehaviour
     
     private void Awake()
     {
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-        } 
-        else 
-        {
-            instance = this;
-        }
+        ServiceLocator.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
     }
 
     public void SetView(View viewToShow)

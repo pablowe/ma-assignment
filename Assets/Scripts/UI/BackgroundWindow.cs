@@ -8,12 +8,12 @@ public class BackgroundWindow : Window
 
     private void Start()
     {
-	    SimpleUiManager.Instance.assetBundleLoaded += OnAssetBundleLoaded;
+	    ServiceLocator.ResolveAndGet<SimpleUiManager>().assetBundleLoaded += OnAssetBundleLoaded;
     }
     
     private void OnDestroy()
     {
-	    SimpleUiManager.Instance.assetBundleLoaded -= OnAssetBundleLoaded;
+	    ServiceLocator.ResolveAndGet<SimpleUiManager>().assetBundleLoaded -= OnAssetBundleLoaded;
     }
 
     private void OnAssetBundleLoaded(AssetBundle assetBundle)

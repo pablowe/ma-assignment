@@ -34,11 +34,13 @@ public class GameWindow : Window
 
         InitializeBoard();
 
-        GameManager.Instance.TimeLeftChanged += OnTimeLeftChanged;
-        GameManager.Instance.GameInitialized += OnGameInitialized;
-        GameManager.Instance.PlayerChanged += OnPlayerChanged;
+        var gameManager = ServiceLocator.ResolveAndGet<GameManager>();
 
-        GameManager.Instance.InitializeGame();
+        gameManager.TimeLeftChanged += OnTimeLeftChanged;
+        gameManager.GameInitialized += OnGameInitialized;
+        gameManager.PlayerChanged += OnPlayerChanged;
+
+        gameManager.InitializeGame();
     }
 
     /// <inheritdoc />
@@ -48,34 +50,36 @@ public class GameWindow : Window
 
         DeinitializeBoard();
         
-        GameManager.Instance.TimeLeftChanged -= OnTimeLeftChanged;
-        GameManager.Instance.GameInitialized -= OnGameInitialized;
-        GameManager.Instance.PlayerChanged -= OnPlayerChanged;
+        var gameManager = ServiceLocator.ResolveAndGet<GameManager>();
+        
+        gameManager.TimeLeftChanged -= OnTimeLeftChanged;
+        gameManager.GameInitialized -= OnGameInitialized;
+        gameManager.PlayerChanged -= OnPlayerChanged;
     }
 
     public void UndoButton()
     {
-        GameManager.Instance.TryUndoLastMove();
+        ServiceLocator.ResolveAndGet<GameManager>().TryUndoLastMove();
     }
 
     public void HintButton()
     {
-        GameManager.Instance.FindHintCoordinatesInCurrentBoard();
+        ServiceLocator.ResolveAndGet<GameManager>().FindHintCoordinatesInCurrentBoard();
     }
 
     public void RestartGameButton()
     {
-        GameManager.Instance.InitializeGame();
+        ServiceLocator.ResolveAndGet<GameManager>().InitializeGame();
     }
     
     private void Awake()
     {
-        SimpleUiManager.Instance.assetBundleLoaded += OnAssetBundleLoaded;
+        ServiceLocator.ResolveAndGet<SimpleUiManager>().assetBundleLoaded += OnAssetBundleLoaded;
     }
 
     private void OnDestroy()
     {
-        SimpleUiManager.Instance.assetBundleLoaded -= OnAssetBundleLoaded;
+        ServiceLocator.ResolveAndGet<SimpleUiManager>().assetBundleLoaded -= OnAssetBundleLoaded;
     }
 
     private void OnTimeLeftChanged(int timeLeft)
