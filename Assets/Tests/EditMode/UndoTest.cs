@@ -11,7 +11,7 @@ namespace Tests
         [Test]
         public void MultipleUndo()
         {
-            var board = new[,]
+            var data = new[,]
             {
                 {X,X,X},
                 {O,_,O},
@@ -60,11 +60,22 @@ namespace Tests
                     {_,_,_}
                 }
             };
+            
+            var board = new Board();
+            board.SetBoardData(data);
+
+            var gameHistorySystem = new GameHistorySystem(board);
+            
+            // SimulateMoves
+            for (int i = moveCoordinatesHistory.Length - 1; i >= 0; i--)
+            {
+                gameHistorySystem.WriteMove(moveCoordinatesHistory[i]);
+            }
 
             for (int i = 0; i < moveCoordinatesHistory.Length; i++)
             {
-                GameManager.UndoMove(moveCoordinatesHistory[i], board);
-                Assert.AreEqual(boardMoveHistory[i], board);
+                gameHistorySystem.GetCoordsAndUndoLastMove();
+                Assert.AreEqual(boardMoveHistory[i], board.GetCurrentData());
             }
         }
     }
