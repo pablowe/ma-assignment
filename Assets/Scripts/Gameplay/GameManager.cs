@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     private HintSystem hintSystem;
     private GameHistorySystem gameHistorySystem;
     private BoardMoveSystem boardMoveSystem;
+    private AiMoveSystem aiMoveSystem;
 
     private Player player1,
                    player2;
@@ -38,6 +39,7 @@ public class GameManager : MonoBehaviour
         hintSystem = new HintSystem(board);
         gameHistorySystem = new GameHistorySystem(board);
         boardMoveSystem = new BoardMoveSystem(board, moveValidator, gameHistorySystem);
+        aiMoveSystem = new AiMoveSystem(hintSystem);
         
         gameSettings = GetInitialGameSettings();
     }
@@ -61,7 +63,6 @@ public class GameManager : MonoBehaviour
         currentPlayer = player1.playersMark == Mark.X ? player1 : player2;
         
         PlayerChanged?.Invoke(currentPlayer);
-
         GameInitialized?.Invoke(gameSettings);
 
         StartNextRound();
@@ -86,7 +87,6 @@ public class GameManager : MonoBehaviour
     public void FindHintCoordinatesInCurrentBoard()
     {
         var suggestedCoordinates = hintSystem.GetHintCoordinates();
-        
         SuggestedValidMoveFound?.Invoke(suggestedCoordinates);
     }
 
@@ -161,7 +161,6 @@ public class GameManager : MonoBehaviour
     private void SwitchCurrentPlayer()
     {
         currentPlayer = GetNextPlayer();
-        
         PlayerChanged?.Invoke(currentPlayer);
     }
 
@@ -177,7 +176,7 @@ public class GameManager : MonoBehaviour
         try
         {
             await Task.Delay(500, aiMoveDelayTaskCancellationTokenSource.Token);
-            OnBoardCellClicked(hintSystem.GetHintCoordinates(), true);
+            OnBoardCellClicked(aiMoveSystem.GetMoveCoordinates(), true);
         }
         catch (TaskCanceledException) { }
     }
@@ -185,14 +184,12 @@ public class GameManager : MonoBehaviour
     private void RestartCountdown()
     {
         if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
-
         countdownCoroutine = StartCoroutine(StartNewCountdown());
     }
 
     private IEnumerator StartNewCountdown()
     {
         var timeLeft = gameSettings.moveTime;
-        
         TimeLeftChanged?.Invoke(timeLeft);
 
         while (timeLeft > 0)
@@ -200,7 +197,6 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSecondsRealtime(1f);
 
             timeLeft -= 1;
-            
             TimeLeftChanged?.Invoke(timeLeft);
         }
 
